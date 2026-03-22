@@ -18,8 +18,10 @@ The script patches `omni.ja` (the main resource archive in Zen's app bundle) to 
 
 Requires Python 3.6+ (ships with macOS).
 
+**Important:** Open Zen at least once before running the patch. macOS needs to approve the app through Gatekeeper first. If you patch a fresh download before opening it, macOS will flag it as "damaged" and refuse to launch it.
+
 ```sh
-# Apply the patch (auto-backs up omni.ja first)
+# Apply the patch
 python3 patch.py
 
 # Check status
@@ -30,21 +32,23 @@ python3 patch.py restore
 
 # Preview without making changes
 python3 patch.py --dry-run
+
+# Show technical details (byte offsets, CRC values)
+python3 patch.py --verbose
 ```
 
-After patching, quit Zen completely and clear the startup cache:
-
-```sh
-/Applications/Zen.app/Contents/MacOS/zen -purgecaches
-```
-
-Then reopen Zen normally.
+The script will:
+1. Check that Zen has been opened before (Gatekeeper-approved) and is not running
+2. Back up the original `omni.ja` (first run only)
+3. Apply the patch and verify it was written correctly
+4. Re-sign the app bundle so macOS doesn't flag it as damaged
+5. Clear the startup cache automatically
 
 **You need to re-run this after every Zen update**, since updates replace `omni.ja`.
 
 ## Backups
 
-Backups are stored in `~/.zen-dock-patch/` with the Zen version and a hash prefix in the filename (e.g. `omni-1.19.3b-4887abe5.ja`). Use `patch.py status` to list them and `patch.py restore` to roll back.
+Backups are stored in `~/Library/Application Support/zen-dock-patch/` with the Zen version and a hash prefix in the filename (e.g. `omni-1.19.3b-4887abe5.ja`). Use `patch.py status` to list them and `patch.py restore` to roll back.
 
 ## Upstream status
 
