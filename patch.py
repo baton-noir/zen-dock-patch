@@ -323,14 +323,20 @@ def cmd_patch(args):
         return 1
 
     # Atomic write
-    fd, tmp_path = tempfile.mkstemp(dir=OMNI_PATH.parent, suffix=".tmp")
     try:
-        with os.fdopen(fd, "wb") as f:
-            f.write(result)
-        os.replace(tmp_path, OMNI_PATH)
-    except BaseException:
-        os.unlink(tmp_path)
-        raise
+        fd, tmp_path = tempfile.mkstemp(dir=OMNI_PATH.parent, suffix=".tmp")
+        try:
+            with os.fdopen(fd, "wb") as f:
+                f.write(result)
+            os.replace(tmp_path, OMNI_PATH)
+        except BaseException:
+            os.unlink(tmp_path)
+            raise
+    except PermissionError:
+        print("  ERROR: Permission denied writing to Zen.app.")
+        print("  macOS may prompt you to allow Terminal to modify apps.")
+        print("  Check System Settings > Privacy & Security, then try again.")
+        return 1
 
     # Verify
     if verify_patch():

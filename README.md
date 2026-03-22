@@ -43,6 +43,8 @@ python3 patch.py --dry-run # preview without making changes
 python3 patch.py --verbose # show technical details
 ```
 
+On first run, macOS will ask you to allow Terminal to modify apps. Click the notification and enable it in System Settings > Privacy & Security, then re-run the command.
+
 The script will:
 1. Check that Zen has been opened before (Gatekeeper-approved) and is not running
 2. Back up the original `omni.ja` (first run only)
