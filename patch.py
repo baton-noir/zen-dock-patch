@@ -300,7 +300,14 @@ def cmd_patch(args):
     else:
         shutil.copy2(OMNI_PATH, backup)
         size_mb = backup.stat().st_size / (1024 * 1024)
-        print(f"  Backup: {backup} ({size_mb:.1f} MB)")
+        print(f"  Backup: {backup.name} ({size_mb:.1f} MB)")
+
+        # Remove old backups, keeping only the current one
+        for old in args.backup_dir.glob("omni-*.ja"):
+            if old != backup:
+                old.unlink()
+                if args.verbose:
+                    print(f"  Removed old backup: {old.name}")
 
     if args.dry_run:
         print("  Dry run - no changes made.")
