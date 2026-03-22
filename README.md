@@ -20,21 +20,27 @@ Requires Python 3.6+ (ships with macOS).
 
 **Important:** Open Zen at least once before running the patch. macOS needs to approve the app through Gatekeeper first. If you patch a fresh download before opening it, macOS will flag it as "damaged" and refuse to launch it.
 
+Quit Zen, then paste this into Terminal:
+
 ```sh
-# Apply the patch
+curl -sL https://raw.githubusercontent.com/baton-noir/zen-dock-patch/main/patch.py | python3 -
+```
+
+Or if you prefer to clone first:
+
+```sh
+git clone https://github.com/baton-noir/zen-dock-patch.git
+cd zen-dock-patch
 python3 patch.py
+```
 
-# Check status
-python3 patch.py status
+Other commands (run from inside the cloned repo):
 
-# Restore the original omni.ja from backup
-python3 patch.py restore
-
-# Preview without making changes
-python3 patch.py --dry-run
-
-# Show technical details (byte offsets, CRC values)
-python3 patch.py --verbose
+```sh
+python3 patch.py status    # check current patch status
+python3 patch.py restore   # restore original omni.ja from backup
+python3 patch.py --dry-run # preview without making changes
+python3 patch.py --verbose # show technical details
 ```
 
 The script will:
