@@ -18,10 +18,12 @@ any offsets. This preserves the optimised JAR structure.
 
 import argparse
 import hashlib
+import os
 import plistlib
+import shutil
 import struct
-import subprocess
 import sys
+import tempfile
 import zlib
 from pathlib import Path
 
@@ -34,9 +36,10 @@ ORIGINAL = b"this.#taskbarProgresses.add(gInterfaces.macTaskbarProgress);"
 # Same length replacement - returns early before registering the progress target
 REPLACEMENT = b"return;/* dock progress disabled for Tahoe icon fix      */;"
 
-assert len(ORIGINAL) == len(REPLACEMENT), (
-    f"Size mismatch: original={len(ORIGINAL)}, replacement={len(REPLACEMENT)}"
-)
+if len(ORIGINAL) != len(REPLACEMENT):
+    raise ValueError(
+        f"Size mismatch: original={len(ORIGINAL)}, replacement={len(REPLACEMENT)}"
+    )
 
 
 def get_zen_version():
@@ -224,8 +227,6 @@ def cmd_patch(args):
     if existing:
         print(f"  Backup already exists: {existing.name}")
     else:
-        import shutil
-
         shutil.copy2(OMNI_PATH, backup)
         print(f"  Backed up to {backup}")
 
@@ -242,8 +243,16 @@ def cmd_patch(args):
     if result is None:
         return 1
 
-    with open(OMNI_PATH, "wb") as f:
-        f.write(result)
+    # Atomic write: write to temp file then rename, so a crash mid-write
+    # doesn't leave an empty/corrupt omni.ja
+    fd, tmp_path = tempfile.mkstemp(dir=OMNI_PATH.parent, suffix=".tmp")
+    try:
+        with os.fdopen(fd, "wb") as f:
+            f.write(result)
+        os.replace(tmp_path, OMNI_PATH)
+    except BaseException:
+        os.unlink(tmp_path)
+        raise
 
     print(f"  Written: {OMNI_PATH} ({len(result)} bytes)")
     print()
@@ -270,8 +279,6 @@ def cmd_restore(args):
     if args.dry_run:
         print(f"  Would restore from: {backup.name}")
         return 0
-
-    import shutil
 
     shutil.copy2(backup, OMNI_PATH)
     print(f"  Restored from {backup.name}")
