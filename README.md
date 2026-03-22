@@ -2,23 +2,25 @@
 
 Patches [Zen Browser](https://zen-browser.app) on macOS to disable the dock download progress indicator, preserving the Tahoe "Clear" icon style.
 
-## The problem
+**This is mainly for personal use:** Publicly shared just in case anyone else finds the issue nagging enough to want to fix it, but use at your own risk.
 
-On macOS Tahoe (26), System Settings lets you choose a "Clear" (monochrome/transparent) icon style. Zen's dock icon renders correctly in Clear style - until you download a file. Firefox's `nsMacDockSupport` replaces the OS-managed dock tile with a custom `NSView` containing a static bitmap and a progress bar. macOS can't apply Clear styling to this bitmap, so the icon reverts to full colour and stays that way until you restart the Dock.
+## The issue
 
-There's no `about:config` preference to disable this. The progress indicator is registered unconditionally in `DownloadsTaskbar.sys.mjs`.
+On macOS Tahoe (26), System Settings lets you choose a "Clear" (monochrome/transparent) icon style. Zen's dock icon renders correctly in Clear style until you download a file. Firefox's `nsMacDockSupport` replaces the OS-managed dock tile with a custom `NSView` containing a static bitmap and a progress bar. macOS can't apply Clear styling to this bitmap, so the icon reverts to full colour and stays that way until you restart the Dock.
 
-This also affects stock Firefox (tracked as [Bug 1997246](https://bugzilla.mozilla.org/show_bug.cgi?id=1997246)).
+There is no `about:config` preference to disable this yet.
+
+This stems from stock Firefox (tracked as [Bug 1997246](https://bugzilla.mozilla.org/show_bug.cgi?id=1997246) - this is about badges added to the icon, which I assume stems from a similar issue, not specific to Zen.
 
 ## What this does
 
-The script patches `omni.ja` (the main resource archive in Zen's app bundle) to skip the macOS dock progress registration. It does a same-size byte replacement directly in the archive and updates the ZIP CRC checksums. Downloads still work normally - only the dock progress bar is suppressed.
+The script patches `omni.ja` (the main resource archive in Zen's app bundle) to skip the macOS dock progress registration. It does a same-size byte replacement directly in the archive and updates the ZIP CRC checksums. Downloads still work normally; only the dock progress bar is suppressed.
 
 ## Usage
 
 Requires Python 3.6+ (ships with macOS).
 
-**Important:** Open Zen at least once before running the patch. macOS needs to approve the app through Gatekeeper first. If you patch a fresh download before opening it, macOS will flag it as "damaged" and refuse to launch it.
+Your local copy of Zen needs to have been through macOS's Gatekeeper first. If you patch a fresh download before opening it, macOS will flag it as "damaged" and refuse to launch it.
 
 Quit Zen, then paste this into Terminal:
 
@@ -43,7 +45,7 @@ python3 patch.py --dry-run # preview without making changes
 python3 patch.py --verbose # show technical details
 ```
 
-On first run, macOS will ask you to allow Terminal to modify apps. Click the notification and enable it in System Settings > Privacy & Security, then re-run the command.
+On first run, macOS will ask you to allow Terminal (or whatever terminal you used) to modify apps, if you haven't yet. Click the notification and enable it in System Settings > Privacy & Security, then re-run the command.
 
 The script will:
 1. Check that Zen has been opened before (Gatekeeper-approved) and is not running
@@ -58,15 +60,6 @@ The script will:
 
 Backups are stored in `~/Library/Application Support/zen-dock-patch/` with the Zen version and a hash prefix in the filename (e.g. `omni-1.19.3b-4887abe5.ja`). Use `patch.py status` to list them and `patch.py restore` to roll back.
 
-## Upstream status
-
-A proper fix has been proposed upstream:
-
-- Zen: [#12676](https://github.com/zen-browser/desktop/issues/12676)
-- Firefox: [Bug 1997246](https://bugzilla.mozilla.org/show_bug.cgi?id=1997246)
-
-Once either ships a fix, this tool will be unnecessary.
-
-## License
+## License (seems a bit exaggerated, but there we go...)
 
 [MIT](LICENSE)
