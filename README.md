@@ -10,7 +10,7 @@ On macOS Tahoe (26), System Settings lets you choose a "Clear" (monochrome/trans
 
 There is no `about:config` preference to disable this yet.
 
-This stems from stock Firefox (tracked as [Bug 1997246](https://bugzilla.mozilla.org/show_bug.cgi?id=1997246) - this is about badges added to the icon, which I assume stems from a similar issue, not specific to Zen.
+This stems from stock Firefox (tracked as [Bug 1997246](https://bugzilla.mozilla.org/show_bug.cgi?id=1997246) - this is about badges added to the icon, which I assume stems from a similar issue), not specific to Zen.
 
 ## What this does
 
